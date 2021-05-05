@@ -44,12 +44,8 @@ persisted_settings:dict = read_file(
     )
 )
 
-# Display LoL keys types
-for e in persisted_settings['files'][1]['sections']:
-    print(e['name'])
-
 # Keyboard layouts
-keyboard_lines = {
+keyboard_layout = {
     "qwerty": {
         'keys': [
             ['esc'] + [f'F{i}' for i in range(1, 13)] + ['del'],
@@ -93,11 +89,11 @@ class User_Interface(tk.Frame):
         self.master.maxsize(width=1010, height=275)
         self.master.minsize(width=1010, height=275)
         self.master['bg'] = '#13181B'
-        
+
         self.pack()
         self.create_widgets()
         self.display_keyboard()
-    
+
     def create_widgets(self):
         # Create the main menu
         menu_bar = tk.Menu(self.master)
@@ -115,7 +111,7 @@ class User_Interface(tk.Frame):
         edit_menu.add_command(label='Reset')
 
         option_menu = tk.Menu(menu_bar, tearoff=0)
-        
+
         keyboards_menu = tk.Menu(option_menu, tearoff=0)
         keyboards_menu.add_command(label='azerty', command=lambda: self.display_keyboard('azerty'))
         keyboards_menu.add_command(label='qwerty', command=lambda: self.display_keyboard('qwerty'))
@@ -139,17 +135,17 @@ class User_Interface(tk.Frame):
         for widget in self.winfo_children():
             widget.destroy()
 
-        keyboard = keyboard_configuration if keyboard_configuration in keyboard_lines else 'qwerty'
+        keyboard = keyboard_configuration if keyboard_configuration in keyboard_layout else 'qwerty'
         buttons_lines = [
             [tk.Button(self, text=letter, width=6, relief='groove', bg='#ddd') for letter in line]
-            for line in keyboard_lines[keyboard]['keys']
+            for line in keyboard_layout[keyboard]['keys']
         ]
 
         for i in range(len(buttons_lines)):
             bonus_index = 0
             for index, character_button in enumerate(buttons_lines[i]):
                 for jndex, key in enumerate(persisted_settings['files'][1]['sections'][0]['settings']):
-                    if any(e == key['value'] for e in (
+                    if any(e in key['value'].split(',') for e in (
                         f"[{character_button['text'].lower()}]",
                         f"[{character_button['text'][0].upper()}{character_button['text'][1:].lower()}]",
                         f"[{character_button['text']}]")
@@ -162,6 +158,8 @@ class User_Interface(tk.Frame):
                             character_button['bg'] = 'red'
                         elif jndex == 40:
                             character_button['bg'] = 'yellow'
+                        elif jndex == 42:
+                            character_button['bg'] = 'gray'
                         elif 65 <= jndex <= 68:
                             character_button['bg'] = 'brown'
                         elif 142 <= jndex <= 147:
@@ -173,22 +171,21 @@ class User_Interface(tk.Frame):
                         else:
                             character_button['bg'] = 'green'
                         break
-                
+
                 # Grid button
-                if character_button['text'] in keyboard_lines[keyboard]['spans']:
+                if character_button['text'] in keyboard_layout[keyboard]['spans']:
                     character_button.grid(
                         row=i, column=index + bonus_index,
-                        ipadx=int(19 * keyboard_lines[keyboard]['spans'][character_button['text']]),
+                        ipadx=int(19 * keyboard_layout[keyboard]['spans'][character_button['text']]),
                         ipady=10,
-                        columnspan=keyboard_lines[keyboard]['spans'][character_button['text']]
+                        columnspan=keyboard_layout[keyboard]['spans'][character_button['text']]
                     )
-                    bonus_index += keyboard_lines[keyboard]['spans'][character_button['text']] - 1
+                    bonus_index += keyboard_layout[keyboard]['spans'][character_button['text']] - 1
                 elif character_button['text'] == 'space':
                     character_button.grid(row=i, column=index + bonus_index, ipadx=200, ipady=10, columnspan=7)
                     bonus_index += 6
                 else:
                     character_button.grid(row=i, column=index + bonus_index, ipadx=6, ipady=10)
-                    
 
 
 root = tk.Tk()
