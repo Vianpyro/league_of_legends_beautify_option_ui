@@ -168,7 +168,7 @@ class User_Interface(tk.Frame):
 
     def display_keyboard(self, keyboard_configuration:str=None) -> None:
         # Remove every widget
-        for widget in self.winfo_children():
+        for widget in self.winfo_children()[:len(color_code)]:
             widget.destroy()
 
         self.keyboard = keyboard_configuration if keyboard_configuration in keyboard_layout else 'qwerty'
