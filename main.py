@@ -72,6 +72,20 @@ keyboard_layout = {
     }
 }
 
+# Color code
+color_code = {
+    'attack_move': 'gray',
+    'back': 'aqua',
+    'camera_select_ally': 'brown',
+    'camera_snap_self': 'lightblue',
+    'champion_spell': 'red',
+    'default': 'lightgreen',
+    'open_shop': 'orange',
+    'summoner_spell': 'yellow',
+    'use_item': 'pink',
+    'ward': 'gold'
+}
+
 ##################################
 # User Interface
 ##################################
@@ -82,19 +96,41 @@ from tkinter import ttk
 class User_Interface(tk.Frame):
     def __init__(self, master:tk.Tk=None):
         super().__init__(master)
+        self.size = (1010, 275 + (len(color_code) * 23))
         self.master = master
         self.master.title('League of Legends keyboard parameters UI')
         self.master.iconbitmap(f'{os.path.sep.join(__file__.split(os.path.sep)[:-1])}{os.path.sep}league_of_help_icon.ico')
-        self.master.geometry('1010x275')
-        self.master.maxsize(width=1010, height=275)
-        self.master.minsize(width=1010, height=275)
+        self.master.geometry(f'{self.size[0]}x{self.size[1]}')
+        self.master.maxsize(width=self.size[0], height=self.size[1])
+        self.master.minsize(width=self.size[0], height=self.size[1])
         self.master['bg'] = '#13181B'
+
+        self.keyboard = 'qwerty'
 
         self.pack()
         self.create_widgets()
         self.display_keyboard()
+        self.display_colors()
+        
+    def display_colors(self) -> None:
+        for index, color in enumerate(color_code):
+            tk.Button(
+                self, width=6, bg=color_code[color]
+            ).grid(
+                row=(len(keyboard_layout[self.keyboard]['keys']) + (index // 2) + 1),
+                column=(index %  2) * (len(keyboard_layout[self.keyboard]['keys'][0]) // 2),
+                ipadx=6, ipady=10
+            )
+            tk.Label(
+                self, text=color.replace('_', ' '),
+                width=6, anchor='w'
+            ).grid(
+                row=(len(keyboard_layout[self.keyboard]['keys']) + (index // 2) + 1),
+                column=((index %  2) * (len(keyboard_layout[self.keyboard]['keys'][0]) // 2) + 1),
+                ipadx=(19 * 2), ipady=10, columnspan=2
+            )
 
-    def create_widgets(self):
+    def create_widgets(self) -> None:
         # Create the main menu
         menu_bar = tk.Menu(self.master)
 
@@ -130,15 +166,16 @@ class User_Interface(tk.Frame):
         menu_bar.add_cascade(label='Help', menu=help_menu)
         self.master['menu'] = menu_bar
 
-    def display_keyboard(self, keyboard_configuration:str=None):
+    def display_keyboard(self, keyboard_configuration:str=None) -> None:
         # Remove every widget
         for widget in self.winfo_children():
             widget.destroy()
 
-        keyboard = keyboard_configuration if keyboard_configuration in keyboard_layout else 'qwerty'
+        self.keyboard = keyboard_configuration if keyboard_configuration in keyboard_layout else 'qwerty'
+        
         buttons_lines = [
             [tk.Button(self, text=letter, width=6, relief='groove', bg='#ddd') for letter in line]
-            for line in keyboard_layout[keyboard]['keys']
+            for line in keyboard_layout[self.keyboard]['keys']
         ]
 
         for i in range(len(buttons_lines)):
@@ -151,36 +188,36 @@ class User_Interface(tk.Frame):
                         f"[{character_button['text']}]")
                     ):
                         if jndex in (5, 69):
-                            character_button['bg'] = 'blue'
+                            character_button['bg'] = color_code['camera_snap_self']
                         elif 6 <= jndex <= 7:
-                            character_button['bg'] = 'orange'
+                            character_button['bg'] = color_code['summoner_spell']
                         elif 8 <= jndex <= 11:
-                            character_button['bg'] = 'red'
+                            character_button['bg'] = color_code['champion_spell']
                         elif jndex == 40:
-                            character_button['bg'] = 'yellow'
+                            character_button['bg'] = color_code['open_shop']
                         elif jndex == 42:
-                            character_button['bg'] = 'gray'
+                            character_button['bg'] = color_code['attack_move']
                         elif 65 <= jndex <= 68:
-                            character_button['bg'] = 'brown'
+                            character_button['bg'] = color_code['camera_select_ally']
                         elif 142 <= jndex <= 147:
-                            character_button['bg'] = 'pink'
+                            character_button['bg'] = color_code['use_item']
                         elif jndex == 148:
-                            character_button['bg'] = 'aqua'
+                            character_button['bg'] = color_code['back']
                         elif jndex == 149:
-                            character_button['bg'] = 'gold'
+                            character_button['bg'] = color_code['ward']
                         else:
-                            character_button['bg'] = 'green'
+                            character_button['bg'] = color_code['default']
                         break
 
                 # Grid button
-                if character_button['text'] in keyboard_layout[keyboard]['spans']:
+                if character_button['text'] in keyboard_layout[self.keyboard]['spans']:
                     character_button.grid(
                         row=i, column=index + bonus_index,
-                        ipadx=int(19 * keyboard_layout[keyboard]['spans'][character_button['text']]),
+                        ipadx=int(19 * keyboard_layout[self.keyboard]['spans'][character_button['text']]),
                         ipady=10,
-                        columnspan=keyboard_layout[keyboard]['spans'][character_button['text']]
+                        columnspan=keyboard_layout[self.keyboard]['spans'][character_button['text']]
                     )
-                    bonus_index += keyboard_layout[keyboard]['spans'][character_button['text']] - 1
+                    bonus_index += keyboard_layout[self.keyboard]['spans'][character_button['text']] - 1
                 elif character_button['text'] == 'space':
                     character_button.grid(row=i, column=index + bonus_index, ipadx=200, ipady=10, columnspan=7)
                     bonus_index += 6
