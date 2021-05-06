@@ -37,12 +37,17 @@ def read_file(path:str=None) -> (dict, str):
     return data
 
 # Get the LoL file where the options are saved
-persisted_settings:dict = read_file(
-    find_file(
-        known_path=f'Riot Games{os.path.sep}League of Legends{os.path.sep}Config',
-        name='PersistedSettings.json'
+try:
+    persisted_settings:dict = read_file(
+        find_file(
+            known_path=f'Riot Games{os.path.sep}League of Legends{os.path.sep}Config',
+            name='PersistedSettings.json'
+        )
     )
-)
+except:
+    raise ValueError('Unable to locate the League of Legends Config folder.')
+else:
+    print('Successfuly loaded the League of Legends Config folder.')
 
 # Keyboard layouts
 keyboard_layout = {
@@ -118,7 +123,7 @@ class User_Interface(tk.Frame):
                 self, width=6, bg=color_code[color]
             ).grid(
                 row=(len(keyboard_layout[self.keyboard]['keys']) + (index // 2) + 1),
-                column=(index %  2) * (len(keyboard_layout[self.keyboard]['keys'][0]) // 2),
+                column=(index % 2) * (len(keyboard_layout[self.keyboard]['keys'][0]) // 2),
                 ipadx=6, ipady=10
             )
             tk.Label(
@@ -126,7 +131,7 @@ class User_Interface(tk.Frame):
                 width=6, anchor='w'
             ).grid(
                 row=(len(keyboard_layout[self.keyboard]['keys']) + (index // 2) + 1),
-                column=((index %  2) * (len(keyboard_layout[self.keyboard]['keys'][0]) // 2) + 1),
+                column=((index % 2) * (len(keyboard_layout[self.keyboard]['keys'][0]) // 2) + 1),
                 ipadx=(19 * 2), ipady=10, columnspan=2
             )
 
