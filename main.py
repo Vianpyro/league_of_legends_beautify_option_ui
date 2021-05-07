@@ -81,12 +81,15 @@ keyboard_layout = {
 color_code = {
     'attack_move': 'gray',
     'back': 'aqua',
-    'camera_select_ally': 'brown',
-    'camera_snap_self': 'lightblue',
-    'champion_spell': 'red',
-    'default': 'lightgreen',
+    'camera_select_ally': 'skyblue1',
+    'camera_snap_self': 'lightsteelblue',
+    'champion_spell': 'tomato',
+    'default_color': 'lightgreen',
+    'enemy_vision': 'chocolate3',
     'open_shop': 'orange',
+    'show_character_menu': 'chartreuse2',
     'summoner_spell': 'yellow',
+    'show_scoreboard': 'darkorchid1',
     'use_item': 'pink',
     'ward': 'gold'
 }
@@ -101,7 +104,7 @@ from tkinter import ttk
 class User_Interface(tk.Frame):
     def __init__(self, master:tk.Tk=None):
         super().__init__(master)
-        self.size = (1010, 275 + (len(color_code) * 23))
+        self.size = (1010, 275 + ((len(color_code) + (len(color_code) % 2)) * 23))
         self.master = master
         self.master.title('League of Legends keyboard parameters UI')
         self.master.iconbitmap(f'{os.path.sep.join(__file__.split(os.path.sep)[:-1])}{os.path.sep}league_of_help_icon.ico')
@@ -186,33 +189,42 @@ class User_Interface(tk.Frame):
         for i in range(len(buttons_lines)):
             bonus_index = 0
             for index, character_button in enumerate(buttons_lines[i]):
-                for jndex, key in enumerate(persisted_settings['files'][1]['sections'][0]['settings']):
-                    if any(e in key['value'].split(',') for e in (
-                        f"[{character_button['text'].lower()}]",
-                        f"[{character_button['text'][0].upper()}{character_button['text'][1:].lower()}]",
-                        f"[{character_button['text']}]")
-                    ):
-                        if jndex in (5, 69):
-                            character_button['bg'] = color_code['camera_snap_self']
-                        elif 6 <= jndex <= 7:
-                            character_button['bg'] = color_code['summoner_spell']
-                        elif 8 <= jndex <= 11:
-                            character_button['bg'] = color_code['champion_spell']
-                        elif jndex == 40:
-                            character_button['bg'] = color_code['open_shop']
-                        elif jndex == 42:
-                            character_button['bg'] = color_code['attack_move']
-                        elif 65 <= jndex <= 68:
-                            character_button['bg'] = color_code['camera_select_ally']
-                        elif 142 <= jndex <= 147:
-                            character_button['bg'] = color_code['use_item']
-                        elif jndex == 148:
-                            character_button['bg'] = color_code['back']
-                        elif jndex == 149:
-                            character_button['bg'] = color_code['ward']
-                        else:
-                            character_button['bg'] = color_code['default']
-                        break
+                for section in persisted_settings['files'][1]['sections']:
+                    for jndex, key in enumerate(section['settings']):
+                        if any(e in key['value'].split(',') for e in (
+                            f"[{character_button['text'].lower()}]",
+                            f"[{character_button['text'][0].upper()}{character_button['text'][1:].lower()}]",
+                            f"[{character_button['text']}]")
+                        ):
+                            setting_name = section['settings'][jndex]['name']
+                            
+                            if setting_name in ('evtCameraSnap', 'evtSelectSelf'):
+                                character_button['bg'] = color_code['camera_snap_self']
+                            elif 'evtCastAvatarSpell' in setting_name:
+                                character_button['bg'] = color_code['summoner_spell']
+                            elif 'evtCastSpell' in setting_name:
+                                character_button['bg'] = color_code['champion_spell']
+                            elif setting_name == 'evtOpenShop':
+                                character_button['bg'] = color_code['open_shop']
+                            elif 'evtPlayerAttackMove' in setting_name:
+                                character_button['bg'] = color_code['attack_move']
+                            elif setting_name == 'evtPlayerPingAreaIsWarded':
+                                character_button['bg'] = color_code['enemy_vision']
+                            elif 'evtSelectAlly' in setting_name:
+                                character_button['bg'] = color_code['camera_select_ally']
+                            elif setting_name == 'evtShowCharacterMenu':
+                                character_button['bg'] = color_code['show_character_menu']
+                            elif any(f'evtUseItem{i}' == setting_name for i in range(7)):
+                                character_button['bg'] = color_code['use_item']
+                            elif setting_name == 'evtUseItem7':
+                                character_button['bg'] = color_code['back']
+                            elif setting_name == 'evtUseVisionItem':
+                                character_button['bg'] = color_code['ward']
+                            elif 'Tab' in section['settings'][jndex]['value'] or setting_name == 'evtShowScoreBoard':
+                                character_button['bg'] = color_code['show_scoreboard']
+                            else:
+                                character_button['bg'] = color_code['default_color']
+                            break
 
                 # Grid button
                 if character_button['text'] in keyboard_layout[self.keyboard]['spans']:
